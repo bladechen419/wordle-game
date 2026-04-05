@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wordle</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f9f9f7;
+      color: #2c2c2a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      max-width: 500px;
+      padding: 16px 0 12px;
+      text-align: center;
+      border-bottom: 1px solid #d3d1c7;
+      margin-bottom: 24px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #5f5e5a;
+      margin-bottom: 20px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+
+    .board {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .row { display: flex; gap: 6px; }
+
+    .tile {
+      width: 56px;
+      height: 56px;
+      border: 1.5px solid #b4b2a9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 600;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+      background: #fff;
+      color: #2c2c2a;
+      user-select: none;
+    }
+    .tile.active-row { border-color: #888780; }
+    .tile.correct { background: #3b6d11; border-color: #3b6d11; color: #eaf3de; }
+    .tile.present { background: #ba7517; border-color: #ba7517; color: #faeeda; }
+    .tile.absent  { background: #5f5e5a; border-color: #5f5e5a; color: #f1efe8; }
+
+    .message {
+      font-size: 15px;
+      color: #5f5e5a;
+      min-height: 22px;
+      text-align: center;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .message.win  { color: #3b6d11; }
+    .message.lose { color: #a32d2d; }
+
+    .keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .kb-row { display: flex; gap: 5px; }
+
+    .key {
+      height: 52px;
+      min-width: 36px;
+      padding: 0 8px;
+      border: 1px solid #b4b2a9;
+      border-radius: 6px;
+      background: #e8e6df;
+      color: #2c2c2a;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+      transition: background 0.2s, color 0.2s;
+      user-select: none;
+    }
+    .key:hover { background: #d3d1c7; }
+    .key.wide { min-width: 56px; font-size: 11px; }
+    .key.correct { background: #3b6d11; border-color: #3b6d11; color: #eaf3de; }
+    .key.present { background: #ba7517; border-color: #ba7517; color: #faeeda; }
+    .key.absent  { background: #5f5e5a; border-color: #5f5e5a; color: #f1efe8; }
+
+    .new-game-btn {
+      padding: 10px 28px;
+      border: 1.5px solid #888780;
+      border-radius: 8px;
+      background: #fff;
+      color: #2c2c2a;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .new-game-btn:hover { background: #f1efe8; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1a18; color: #e8e6df; }
+      header { border-bottom-color: #444441; }
+      .tile { background: #2c2c2a; border-color: #5f5e5a; color: #e8e6df; }
+      .tile.active-row { border-color: #888780; }
+      .key { background: #3a3a38; border-color: #5f5e5a; color: #e8e6df; }
+      .key:hover { background: #444441; }
+      .new-game-btn { background: #2c2c2a; border-color: #888780; color: #e8e6df; }
+      .new-game-btn:hover { background: #3a3a38; }
+      .message { color: #b4b2a9; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Wordle</h1>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#3b6d11;"></div> Correct spot</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ba7517;"></div> Wrong spot</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5f5e5a;"></div> Not in word</div>
+  </div>
+
+  <div class="board" id="board"></div>
+  <div class="message" id="message"></div>
+  <div class="keyboard" id="keyboard"></div>
+  <button class="new-game-btn" id="newgame">New game</button>
+
+  <script>
+    const WORDS = ["CRANE","SLATE","BRAIN","FLOCK","GLINT","TROUT","SWIFT","PLUMB","GRAZE","STOVE","BLOOM","CRIMP","DWARF","FLINT","GROAN","HINGE","KNELT","LATCH","MOURN","OXIDE","PATCH","QUIRK","RANCH","SCALD","THYME","ULCER","VAULT","WALTZ","XENON","YODEL","BLAZE","CHANT","DEPOT","EMBER","FAINT","GUISE","HAUNT","INGOT","JOUST","KARMA","LODGE","MERCY","NUDGE","OZONE","PERCH","QUEST","RIVET","SPUNK","TAUNT","USHER","VIGOR","WASTE","EXPEL","YACHT","ABYSS","BRAWL","CROUP","DITCH","FROST","GRUEL","HUMID","INFER","JOKER","KNAVE","LILAC","MIRTH","NOTCH","OPTIC","PRAWN","QUILL","REGAL","SHAWL","TOXIC","UTTER","VENOM","WRING","YEARN","ZESTY","ALBUM","BENCH","CLASH","DOWEL","ELBOW","FRAUD","GLOOM","HARSH","IVORY","JUMPY","KNACK","LEMON","MURAL","NERVE","PIXEL","QUOTA","RIVAL","SCOUT","THORN","UNIFY","VALID","WEARY","BIRCH","CAMEL","DELTA","ENVOY","FINCH","GRAFT","HOIST","IRONY","JOIST","KNEEL","LUNAR","MAXIM","NOBLE","OTTER","PLAID","RESIN","SQUAD","TWEAK","VOUCH","WITCH","EPOCH","YIELD","ABODE","BROTH","CUBIC","DIRGE","EGRET","FLUTE","GRIPE","HEIST","INDEX","KAPOW","LUSTY","MUSTY","ORGAN","POUCH","QUACK","REMIT","SCONE","TITHE","UNTIE","VIVID","WHEAT","AXIOM","BURLY","DREAD","EVOKE","FILTH","GUSTO","HAVEN","INEPT","JETTY","LIBEL","MANGY","NIFTY","OMEGA","PUFFY","REBEL","SHELF","TABOO","UMBRA","VAPOR","WHACK","YUMMY","ZIPPY","AFOOT","BOAST","CLEFT","ENSUE","FROND","GRUFF","HOTLY","INLAY","JEWEL","LUSHY","MOIST","NYMPH","OUTDO","PLONK","RUNIC","STOIC","TRYST","UNCUT","WHELP","SPORE","STUMP","CRISP","BLUNT","FROWN","SHRUG","EXPEL","KNOLL","SCRAM","FLUNG","GLARE","THUMP","BRINK","DWELT","PRISM","QUIRK","SCUFF","SWAMP","TRAMP","WRATH"];
+
+    let secret, guesses, current, gameOver;
+
+    function pick() { return WORDS[Math.floor(Math.random() * WORDS.length)]; }
+
+    function init() {
+      secret = pick();
+      guesses = [];
+      current = "";
+      gameOver = false;
+      render();
+      const msg = document.getElementById("message");
+      msg.textContent = "";
+      msg.className = "message";
+    }
+
+    function grade(word) {
+      const res = Array(5).fill("absent");
+      const sArr = secret.split("");
+      const used = Array(5).fill(false);
+      for (let i = 0; i < 5; i++) {
+        if (word[i] === sArr[i]) { res[i] = "correct"; used[i] = true; }
+      }
+      for (let i = 0; i < 5; i++) {
+        if (res[i] === "correct") continue;
+        for (let j = 0; j < 5; j++) {
+          if (!used[j] && word[i] === sArr[j]) { res[i] = "present"; used[j] = true; break; }
+        }
+      }
+      return res;
+    }
+
+    function render() {
+      const board = document.getElementById("board");
+      board.innerHTML = "";
+      for (let r = 0; r < 6; r++) {
+        const row = document.createElement("div");
+        row.className = "row";
+        const guess = guesses[r] || null;
+        for (let c = 0; c < 5; c++) {
+          const tile = document.createElement("div");
+          tile.className = "tile";
+          if (guess) {
+            tile.textContent = guess.word[c] || "";
+            tile.classList.add(guess.result[c]);
+          } else if (r === guesses.length && !gameOver) {
+            tile.textContent = current[c] || "";
+            tile.classList.add("active-row");
+          }
+          row.appendChild(tile);
+        }
+        board.appendChild(row);
+      }
+      renderKeyboard();
+    }
+
+    function renderKeyboard() {
+      const kb = document.getElementById("keyboard");
+      kb.innerHTML = "";
+      const rows = [
+        ["Q","W","E","R","T","Y","U","I","O","P"],
+        ["A","S","D","F","G","H","J","K","L"],
+        ["ENTER","Z","X","C","V","B","N","M","DEL"]
+      ];
+      const state = {};
+      for (const g of guesses) {
+        for (let i = 0; i < 5; i++) {
+          const l = g.word[i], r = g.result[i];
+          if (r === "correct") state[l] = "correct";
+          else if (r === "present" && state[l] !== "correct") state[l] = "present";
+          else if (!state[l]) state[l] = "absent";
+        }
+      }
+      rows.forEach(row => {
+        const div = document.createElement("div");
+        div.className = "kb-row";
+        row.forEach(k => {
+          const btn = document.createElement("button");
+          btn.className = "key" + (k.length > 1 ? " wide" : "");
+          btn.textContent = k === "DEL" ? "⌫" : k;
+          if (state[k]) btn.classList.add(state[k]);
+          btn.addEventListener("click", () => handleKey(k));
+          div.appendChild(btn);
+        });
+        kb.appendChild(div);
+      });
+    }
+
+    function handleKey(k) {
+      if (gameOver) return;
+      const msg = document.getElementById("message");
+      msg.className = "message";
+      if (k === "DEL") { current = current.slice(0, -1); render(); return; }
+      if (k === "ENTER") {
+        if (current.length < 5) { msg.textContent = "Need 5 letters!"; return; }
+        const result = grade(current);
+        guesses.push({ word: current, result });
+        const won = result.every(r => r === "correct");
+        current = "";
+        render();
+        if (won) {
+          gameOver = true;
+          msg.textContent = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"][guesses.length - 1] + " 🎉";
+          msg.className = "message win";
+          return;
+        }
+        if (guesses.length === 6) {
+          gameOver = true;
+          msg.textContent = "The word was " + secret;
+          msg.className = "message lose";
+          return;
+        }
+        return;
+      }
+      if (/^[A-Z]$/.test(k) && current.length < 5) { current += k; render(); }
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key.toUpperCase();
+      if (k === "BACKSPACE") handleKey("DEL");
+      else if (k === "ENTER") handleKey("ENTER");
+      else if (/^[A-Z]$/.test(k)) handleKey(k);
+    });
+
+    document.getElementById("newgame").addEventListener("click", init);
+
+    init();
+  </script>
+</body>
+</html>
