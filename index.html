@@ -25,47 +25,55 @@
       border-bottom: 1px solid #d3d1c7;
       margin-bottom: 24px;
     }
+    header h1 { font-size: 28px; font-weight: 600; letter-spacing: 6px; text-transform: uppercase; }
 
-    header h1 {
-      font-size: 28px;
-      font-weight: 600;
-      letter-spacing: 6px;
-      text-transform: uppercase;
+    /* ---------- DIFFICULTY SCREEN ---------- */
+    #difficulty-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 0 32px;
     }
+    #difficulty-screen h2 { font-size: 16px; font-weight: 500; color: #5f5e5a; letter-spacing: 1px; }
+    .diff-btn {
+      width: 220px; padding: 14px 0;
+      border-radius: 10px; border: 1.5px solid #b4b2a9;
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      letter-spacing: 1px;
+    }
+    .diff-btn:hover { transform: scale(1.03); }
+    .diff-btn.easy  { background: #eaf3de; border-color: #3b6d11; color: #3b6d11; }
+    .diff-btn.med   { background: #faeeda; border-color: #ba7517; color: #ba7517; }
+    .diff-btn.hard  { background: #fcebeb; border-color: #a32d2d; color: #a32d2d; }
+    .diff-desc { font-size: 12px; color: #888780; margin-top: -8px; }
+
+    /* ---------- GAME SCREEN ---------- */
+    #game-screen { display: none; flex-direction: column; align-items: center; gap: 0; }
+
+    .diff-badge {
+      font-size: 12px; font-weight: 600; padding: 3px 12px;
+      border-radius: 20px; margin-bottom: 14px; letter-spacing: 1px;
+    }
+    .diff-badge.easy { background: #eaf3de; color: #3b6d11; }
+    .diff-badge.med  { background: #faeeda; color: #ba7517; }
+    .diff-badge.hard { background: #fcebeb; color: #a32d2d; }
 
     .legend {
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-      color: #5f5e5a;
-      margin-bottom: 20px;
+      display: flex; gap: 16px; font-size: 12px; color: #5f5e5a; margin-bottom: 20px;
     }
     .legend-item { display: flex; align-items: center; gap: 5px; }
     .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
 
-    .board {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 20px;
-    }
-
+    .board { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
     .row { display: flex; gap: 6px; }
-
     .tile {
-      width: 56px;
-      height: 56px;
-      border: 1.5px solid #b4b2a9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 600;
-      text-transform: uppercase;
-      border-radius: 4px;
+      width: 56px; height: 56px; border: 1.5px solid #b4b2a9;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600; text-transform: uppercase;
+      border-radius: 4px; background: #fff; color: #2c2c2a;
       transition: background 0.25s, border-color 0.25s, color 0.25s;
-      background: #fff;
-      color: #2c2c2a;
       user-select: none;
     }
     .tile.active-row { border-color: #888780; }
@@ -74,39 +82,20 @@
     .tile.absent  { background: #5f5e5a; border-color: #5f5e5a; color: #f1efe8; }
 
     .message {
-      font-size: 15px;
-      color: #5f5e5a;
-      min-height: 22px;
-      text-align: center;
-      margin-bottom: 16px;
-      font-weight: 500;
+      font-size: 15px; color: #5f5e5a; min-height: 22px;
+      text-align: center; margin-bottom: 16px; font-weight: 500;
     }
     .message.win  { color: #3b6d11; }
     .message.lose { color: #a32d2d; }
 
-    .keyboard {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: center;
-      margin-bottom: 24px;
-    }
+    .keyboard { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-bottom: 20px; }
     .kb-row { display: flex; gap: 5px; }
-
     .key {
-      height: 52px;
-      min-width: 36px;
-      padding: 0 8px;
-      border: 1px solid #b4b2a9;
-      border-radius: 6px;
-      background: #e8e6df;
-      color: #2c2c2a;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      height: 52px; min-width: 36px; padding: 0 8px;
+      border: 1px solid #b4b2a9; border-radius: 6px;
+      background: #e8e6df; color: #2c2c2a;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
       text-transform: uppercase;
       transition: background 0.2s, color 0.2s;
       user-select: none;
@@ -117,18 +106,16 @@
     .key.present { background: #ba7517; border-color: #ba7517; color: #faeeda; }
     .key.absent  { background: #5f5e5a; border-color: #5f5e5a; color: #f1efe8; }
 
-    .new-game-btn {
-      padding: 10px 28px;
-      border: 1.5px solid #888780;
-      border-radius: 8px;
-      background: #fff;
-      color: #2c2c2a;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
+    .btn-row { display: flex; gap: 10px; }
+    .action-btn {
+      padding: 10px 20px; border: 1.5px solid #888780;
+      border-radius: 8px; background: #fff; color: #2c2c2a;
+      font-size: 13px; font-weight: 500; cursor: pointer;
       transition: background 0.2s;
     }
-    .new-game-btn:hover { background: #f1efe8; }
+    .action-btn:hover { background: #f1efe8; }
+
+    .loading { font-size: 14px; color: #888780; padding: 40px 0; }
 
     @media (prefers-color-scheme: dark) {
       body { background: #1a1a18; color: #e8e6df; }
@@ -137,54 +124,108 @@
       .tile.active-row { border-color: #888780; }
       .key { background: #3a3a38; border-color: #5f5e5a; color: #e8e6df; }
       .key:hover { background: #444441; }
-      .new-game-btn { background: #2c2c2a; border-color: #888780; color: #e8e6df; }
-      .new-game-btn:hover { background: #3a3a38; }
+      .action-btn { background: #2c2c2a; border-color: #888780; color: #e8e6df; }
+      .action-btn:hover { background: #3a3a38; }
       .message { color: #b4b2a9; }
+      .diff-btn.easy { background: #1a2e10; }
+      .diff-btn.med  { background: #2e1f08; }
+      .diff-btn.hard { background: #2e1010; }
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Wordle</h1>
-  </header>
+  <header><h1>Wordle</h1></header>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#3b6d11;"></div> Correct spot</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#ba7517;"></div> Wrong spot</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#5f5e5a;"></div> Not in word</div>
+  <!-- Difficulty selection screen -->
+  <div id="difficulty-screen">
+    <h2>SELECT DIFFICULTY</h2>
+    <button class="diff-btn easy" onclick="startGame('easy')">Easy</button>
+    <p class="diff-desc">Common everyday words</p>
+    <button class="diff-btn med" onclick="startGame('med')">Medium</button>
+    <p class="diff-desc">Less common, trickier words</p>
+    <button class="diff-btn hard" onclick="startGame('hard')">Hard</button>
+    <p class="diff-desc">Rare &amp; challenging words</p>
   </div>
 
-  <div class="board" id="board"></div>
-  <div class="message" id="message"></div>
-  <div class="keyboard" id="keyboard"></div>
-  <button class="new-game-btn" id="newgame">New game</button>
+  <!-- Game screen -->
+  <div id="game-screen">
+    <div class="diff-badge" id="diff-badge"></div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#3b6d11;"></div> Correct spot</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ba7517;"></div> Wrong spot</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#5f5e5a;"></div> Not in word</div>
+    </div>
+
+    <div class="board" id="board"></div>
+    <div class="message" id="message"></div>
+    <div class="keyboard" id="keyboard"></div>
+
+    <div class="btn-row">
+      <button class="action-btn" id="newgame">New word</button>
+      <button class="action-btn" onclick="changeDifficulty()">Change difficulty</button>
+    </div>
+  </div>
 
   <script>
-    const WORDS = ["CRANE","SLATE","BRAIN","FLOCK","GLINT","TROUT","SWIFT","PLUMB","GRAZE","STOVE","BLOOM","CRIMP","DWARF","FLINT","GROAN","HINGE","KNELT","LATCH","MOURN","OXIDE","PATCH","QUIRK","RANCH","SCALD","THYME","ULCER","VAULT","WALTZ","XENON","YODEL","BLAZE","CHANT","DEPOT","EMBER","FAINT","GUISE","HAUNT","INGOT","JOUST","KARMA","LODGE","MERCY","NUDGE","OZONE","PERCH","QUEST","RIVET","SPUNK","TAUNT","USHER","VIGOR","WASTE","EXPEL","YACHT","ABYSS","BRAWL","CROUP","DITCH","FROST","GRUEL","HUMID","INFER","JOKER","KNAVE","LILAC","MIRTH","NOTCH","OPTIC","PRAWN","QUILL","REGAL","SHAWL","TOXIC","UTTER","VENOM","WRING","YEARN","ZESTY","ALBUM","BENCH","CLASH","DOWEL","ELBOW","FRAUD","GLOOM","HARSH","IVORY","JUMPY","KNACK","LEMON","MURAL","NERVE","PIXEL","QUOTA","RIVAL","SCOUT","THORN","UNIFY","VALID","WEARY","BIRCH","CAMEL","DELTA","ENVOY","FINCH","GRAFT","HOIST","IRONY","JOIST","KNEEL","LUNAR","MAXIM","NOBLE","OTTER","PLAID","RESIN","SQUAD","TWEAK","VOUCH","WITCH","EPOCH","YIELD","ABODE","BROTH","CUBIC","DIRGE","EGRET","FLUTE","GRIPE","HEIST","INDEX","KAPOW","LUSTY","MUSTY","ORGAN","POUCH","QUACK","REMIT","SCONE","TITHE","UNTIE","VIVID","WHEAT","AXIOM","BURLY","DREAD","EVOKE","FILTH","GUSTO","HAVEN","INEPT","JETTY","LIBEL","MANGY","NIFTY","OMEGA","PUFFY","REBEL","SHELF","TABOO","UMBRA","VAPOR","WHACK","YUMMY","ZIPPY","AFOOT","BOAST","CLEFT","ENSUE","FROND","GRUFF","HOTLY","INLAY","JEWEL","LUSHY","MOIST","NYMPH","OUTDO","PLONK","RUNIC","STOIC","TRYST","UNCUT","WHELP","SPORE","STUMP","CRISP","BLUNT","FROWN","SHRUG","EXPEL","KNOLL","SCRAM","FLUNG","GLARE","THUMP","BRINK","DWELT","PRISM","QUIRK","SCUFF","SWAMP","TRAMP","WRATH"];
+    let wordList = [];
+    let secret, guesses, current, gameOver, currentDiff;
 
-    let secret, guesses, current, gameOver;
+    const diffLabels = { easy: "EASY", med: "MEDIUM", hard: "HARD" };
+    const diffFiles  = { easy: "word_easy.txt", med: "word_med.txt", hard: "word_hard.txt" };
+    const winMsgs    = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"];
 
-    function pick() { return WORDS[Math.floor(Math.random() * WORDS.length)]; }
+    async function startGame(diff) {
+      currentDiff = diff;
+      document.getElementById("difficulty-screen").style.display = "none";
+      const gs = document.getElementById("game-screen");
+      gs.style.display = "flex";
 
-    function init() {
-      secret = pick();
+      const badge = document.getElementById("diff-badge");
+      badge.textContent = diffLabels[diff];
+      badge.className = "diff-badge " + diff;
+
+      document.getElementById("board").innerHTML = '<p class="loading">Loading words...</p>';
+      document.getElementById("keyboard").innerHTML = "";
+      document.getElementById("message").textContent = "";
+
+      try {
+        const res = await fetch(diffFiles[diff]);
+        if (!res.ok) throw new Error("File not found");
+        const text = await res.text();
+        wordList = text.split(/\r?\n/).map(w => w.trim().toUpperCase()).filter(w => w.length === 5);
+        if (wordList.length === 0) throw new Error("No valid words found");
+        newRound();
+      } catch (e) {
+        document.getElementById("board").innerHTML = "";
+        document.getElementById("message").textContent = "Could not load word file: " + diffFiles[diff];
+        document.getElementById("message").className = "message lose";
+      }
+    }
+
+    function newRound() {
+      secret = wordList[Math.floor(Math.random() * wordList.length)];
       guesses = [];
       current = "";
       gameOver = false;
-      render();
       const msg = document.getElementById("message");
       msg.textContent = "";
       msg.className = "message";
+      render();
+    }
+
+    function changeDifficulty() {
+      document.getElementById("game-screen").style.display = "none";
+      document.getElementById("difficulty-screen").style.display = "flex";
+      document.removeEventListener("keydown", onKey);
     }
 
     function grade(word) {
       const res = Array(5).fill("absent");
       const sArr = secret.split("");
       const used = Array(5).fill(false);
-      for (let i = 0; i < 5; i++) {
-        if (word[i] === sArr[i]) { res[i] = "correct"; used[i] = true; }
-      }
+      for (let i = 0; i < 5; i++) if (word[i] === sArr[i]) { res[i] = "correct"; used[i] = true; }
       for (let i = 0; i < 5; i++) {
         if (res[i] === "correct") continue;
         for (let j = 0; j < 5; j++) {
@@ -227,13 +268,11 @@
         ["ENTER","Z","X","C","V","B","N","M","DEL"]
       ];
       const state = {};
-      for (const g of guesses) {
-        for (let i = 0; i < 5; i++) {
-          const l = g.word[i], r = g.result[i];
-          if (r === "correct") state[l] = "correct";
-          else if (r === "present" && state[l] !== "correct") state[l] = "present";
-          else if (!state[l]) state[l] = "absent";
-        }
+      for (const g of guesses) for (let i = 0; i < 5; i++) {
+        const l = g.word[i], r = g.result[i];
+        if (r === "correct") state[l] = "correct";
+        else if (r === "present" && state[l] !== "correct") state[l] = "present";
+        else if (!state[l]) state[l] = "absent";
       }
       rows.forEach(row => {
         const div = document.createElement("div");
@@ -264,7 +303,7 @@
         render();
         if (won) {
           gameOver = true;
-          msg.textContent = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"][guesses.length - 1] + " 🎉";
+          msg.textContent = winMsgs[guesses.length - 1] + " 🎉";
           msg.className = "message win";
           return;
         }
@@ -279,17 +318,16 @@
       if (/^[A-Z]$/.test(k) && current.length < 5) { current += k; render(); }
     }
 
-    document.addEventListener("keydown", e => {
+    function onKey(e) {
       if (e.ctrlKey || e.metaKey || e.altKey) return;
       const k = e.key.toUpperCase();
       if (k === "BACKSPACE") handleKey("DEL");
       else if (k === "ENTER") handleKey("ENTER");
       else if (/^[A-Z]$/.test(k)) handleKey(k);
-    });
+    }
 
-    document.getElementById("newgame").addEventListener("click", init);
-
-    init();
+    document.addEventListener("keydown", onKey);
+    document.getElementById("newgame").addEventListener("click", newRound);
   </script>
 </body>
 </html>
