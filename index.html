@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wordle</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f9f9f7; color: #2c2c2a;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    }
+    header {
+      width: 100%; max-width: 500px;
+      padding: 16px 0 12px; text-align: center;
+      border-bottom: 1px solid #d3d1c7; margin-bottom: 24px;
+    }
+    header h1 { font-size: 28px; font-weight: 600; letter-spacing: 6px; text-transform: uppercase; }
+    #difficulty-screen {
+      display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 12px 0 32px;
+    }
+    #difficulty-screen h2 { font-size: 16px; font-weight: 500; color: #5f5e5a; letter-spacing: 1px; }
+    .diff-btn {
+      width: 220px; padding: 14px 0; border-radius: 10px; border: 1.5px solid #b4b2a9;
+      font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.1s; letter-spacing: 1px;
+    }
+    .diff-btn:hover { transform: scale(1.03); }
+    .diff-btn.easy { background: #eaf3de; border-color: #3b6d11; color: #3b6d11; }
+    .diff-btn.med  { background: #faeeda; border-color: #ba7517; color: #ba7517; }
+    .diff-btn.hard { background: #fcebeb; border-color: #a32d2d; color: #a32d2d; }
+    .diff-desc { font-size: 12px; color: #888780; margin-top: -8px; }
+    #game-screen { display: none; flex-direction: column; align-items: center; }
+    .diff-badge {
+      font-size: 12px; font-weight: 600; padding: 3px 12px;
+      border-radius: 20px; margin-bottom: 14px; letter-spacing: 1px;
+    }
+    .diff-badge.easy { background: #eaf3de; color: #3b6d11; }
+    .diff-badge.med  { background: #faeeda; color: #ba7517; }
+    .diff-badge.hard { background: #fcebeb; color: #a32d2d; }
+    .legend { display: flex; gap: 16px; font-size: 12px; color: #5f5e5a; margin-bottom: 20px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 14px; height: 14px; border-radius: 3px; }
+    .board { display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px; }
+    .row { display: flex; gap: 6px; }
+    .tile {
+      width: 56px; height: 56px; border: 1.5px solid #b4b2a9;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600; text-transform: uppercase;
+      border-radius: 4px; background: #fff; color: #2c2c2a;
+      transition: background 0.25s, border-color 0.25s, color 0.25s; user-select: none;
+    }
+    .tile.active-row { border-color: #888780; }
+    .tile.correct { background: #3b6d11; border-color: #3b6d11; color: #eaf3de; }
+    .tile.present { background: #ba7517; border-color: #ba7517; color: #faeeda; }
+    .tile.absent  { background: #5f5e5a; border-color: #5f5e5a; color: #f1efe8; }
+    .tile.shake { animation: shake 0.4s ease; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .message {
+      font-size: 15px; color: #5f5e5a; min-height: 22px;
+      text-align: center; margin-bottom: 16px; font-weight: 500;
+    }
+    .message.win  { color: #3b6d11; }
+    .message.lose { color: #a32d2d; }
+    .message.warn { color: #ba7517; }
+    .keyboard { display: flex; flex-direction: column; gap: 6px; align-items: center; margin-bottom: 20px; }
+    .kb-row { display: flex; gap: 5px; }
+    .key {
+      height: 52px; min-width: 36px; padding: 0 8px;
+      border: 1px solid #b4b2a9; border-radius: 6px;
+      background: #e8e6df; color: #2c2c2a; font-size: 13px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      text-transform: uppercase; transition: background 0.2s; user-select: none;
+    }
+    .key:hover { background: #d3d1c7; }
+    .key.wide { min-width: 56px; font-size: 11px; }
+    .key.correct { background: #3b6d11; border-color: #3b6d11; color: #eaf3de; }
+    .key.present { background: #ba7517; border-color: #ba7517; color: #faeeda; }
+    .key.absent  { background: #5f5e5a; border-color: #5f5e5a; color: #f1efe8; }
+    .loading { font-size: 14px; color: #888780; padding: 40px 0; text-align: center; }
+    .btn-row { display: flex; gap: 10px; }
+    .action-btn {
+      padding: 10px 20px; border: 1.5px solid #888780;
+      border-radius: 8px; background: #fff; color: #2c2c2a;
+      font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s;
+    }
+    .action-btn:hover { background: #f1efe8; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #1a1a18; color: #e8e6df; }
+      header { border-bottom-color: #444441; }
+      .tile { background: #2c2c2a; border-color: #5f5e5a; color: #e8e6df; }
+      .tile.active-row { border-color: #888780; }
+      .key { background: #3a3a38; border-color: #5f5e5a; color: #e8e6df; }
+      .key:hover { background: #444441; }
+      .action-btn { background: #2c2c2a; border-color: #888780; color: #e8e6df; }
+      .action-btn:hover { background: #3a3a38; }
+      .message { color: #b4b2a9; }
+      .diff-btn.easy { background: #1a2e10; }
+      .diff-btn.med  { background: #2e1f08; }
+      .diff-btn.hard { background: #2e1010; }
+    }
+  </style>
+</head>
+<body>
+<header><h1>Wordle</h1></header>
+
+<div id="difficulty-screen">
+  <h2>SELECT DIFFICULTY</h2>
+  <button class="diff-btn easy" onclick="startGame('easy')">Easy</button>
+  <p class="diff-desc">Common everyday words</p>
+  <button class="diff-btn med" onclick="startGame('med')">Medium</button>
+  <p class="diff-desc">Less common, trickier words</p>
+  <button class="diff-btn hard" onclick="startGame('hard')">Hard</button>
+  <p class="diff-desc">Rare &amp; challenging words</p>
+</div>
+
+<div id="game-screen">
+  <div class="diff-badge" id="diff-badge"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#3b6d11;"></div> Correct spot</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ba7517;"></div> Wrong spot</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#5f5e5a;"></div> Not in word</div>
+  </div>
+  <div class="board" id="board"></div>
+  <div class="message" id="message"></div>
+  <div class="keyboard" id="keyboard"></div>
+  <div class="btn-row">
+    <button class="action-btn" id="newgame">New word</button>
+    <button class="action-btn" onclick="changeDifficulty()">Change difficulty</button>
+  </div>
+</div>
+
+<script>
+  /*
+    HOW TO ADD NEW WORDS:
+    - Open word_easy.txt, word_med.txt, or word_hard.txt
+    - Also open word_valid.txt
+    - Add the word REVERSED and in CAPITALS on a new line
+    - Example: to add the word CRANE, type ENARC
+    - Add it to both the difficulty file AND word_valid.txt
+    - Upload both updated files to GitHub
+  */
+
+  const diffFiles  = { easy: 'word_easy.txt', med: 'word_med.txt', hard: 'word_hard.txt' };
+  const diffLabels = { easy: 'EASY', med: 'MEDIUM', hard: 'HARD' };
+  const winMsgs    = ["Genius!", "Magnificent!", "Impressive!", "Splendid!", "Great!", "Phew!"];
+
+  let wordList = [], validWords = new Set();
+  let secret, guesses, current, gameOver;
+
+  function decode(text) {
+    return text.split('\n')
+      .map(w => w.trim().toUpperCase().split('').reverse().join(''))
+      .filter(w => w.length === 5);
+  }
+
+  async function loadFile(filename) {
+    const res = await fetch(filename + '?v=' + Date.now());
+    if (!res.ok) throw new Error('Cannot load ' + filename);
+    return res.text();
+  }
+
+  async function startGame(diff) {
+    document.getElementById('difficulty-screen').style.display = 'none';
+    const gs = document.getElementById('game-screen');
+    gs.style.display = 'flex';
+    const badge = document.getElementById('diff-badge');
+    badge.textContent = diffLabels[diff];
+    badge.className = 'diff-badge ' + diff;
+    document.getElementById('board').innerHTML = '<p class="loading">Loading words...</p>';
+    document.getElementById('keyboard').innerHTML = '';
+    setMsg('');
+    try {
+      const [diffText, validText] = await Promise.all([
+        loadFile(diffFiles[diff]),
+        loadFile('word_valid.txt')
+      ]);
+      wordList   = decode(diffText);
+      validWords = new Set(decode(validText));
+      if (wordList.length === 0) throw new Error('No valid words');
+      newRound();
+    } catch(e) {
+      document.getElementById('board').innerHTML = '';
+      setMsg('Could not load word files. Please check your setup.', 'lose');
+    }
+  }
+
+  function newRound() {
+    secret = wordList[Math.floor(Math.random() * wordList.length)];
+    guesses = []; current = ''; gameOver = false;
+    setMsg(''); render();
+  }
+
+  function changeDifficulty() {
+    document.getElementById('game-screen').style.display = 'none';
+    document.getElementById('difficulty-screen').style.display = 'flex';
+  }
+
+  function grade(word) {
+    const res = Array(5).fill('absent');
+    const sArr = secret.split('');
+    const used = Array(5).fill(false);
+    for (let i = 0; i < 5; i++) if (word[i] === sArr[i]) { res[i] = 'correct'; used[i] = true; }
+    for (let i = 0; i < 5; i++) {
+      if (res[i] === 'correct') continue;
+      for (let j = 0; j < 5; j++) {
+        if (!used[j] && word[i] === sArr[j]) { res[i] = 'present'; used[j] = true; break; }
+      }
+    }
+    return res;
+  }
+
+  function shakeRow(idx) {
+    const tiles = document.getElementById('board').querySelectorAll('.row')[idx].querySelectorAll('.tile');
+    tiles.forEach(t => { t.classList.remove('shake'); void t.offsetWidth; t.classList.add('shake'); });
+  }
+
+  function render() {
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    for (let r = 0; r < 6; r++) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const guess = guesses[r] || null;
+      for (let c = 0; c < 5; c++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        if (guess) {
+          tile.textContent = guess.word[c] || '';
+          tile.classList.add(guess.result[c]);
+        } else if (r === guesses.length && !gameOver) {
+          tile.textContent = current[c] || '';
+          tile.classList.add('active-row');
+        }
+        row.appendChild(tile);
+      }
+      board.appendChild(row);
+    }
+    renderKeyboard();
+  }
+
+  function renderKeyboard() {
+    const kb = document.getElementById('keyboard');
+    kb.innerHTML = '';
+    const rows = [
+      ['Q','W','E','R','T','Y','U','I','O','P'],
+      ['A','S','D','F','G','H','J','K','L'],
+      ['ENTER','Z','X','C','V','B','N','M','DEL']
+    ];
+    const state = {};
+    for (const g of guesses) for (let i = 0; i < 5; i++) {
+      const l = g.word[i], r = g.result[i];
+      if (r === 'correct') state[l] = 'correct';
+      else if (r === 'present' && state[l] !== 'correct') state[l] = 'present';
+      else if (!state[l]) state[l] = 'absent';
+    }
+    rows.forEach(row => {
+      const div = document.createElement('div');
+      div.className = 'kb-row';
+      row.forEach(k => {
+        const btn = document.createElement('button');
+        btn.className = 'key' + (k.length > 1 ? ' wide' : '');
+        btn.textContent = k === 'DEL' ? '⌫' : k;
+        if (state[k]) btn.classList.add(state[k]);
+        btn.addEventListener('click', () => handleKey(k));
+        div.appendChild(btn);
+      });
+      kb.appendChild(div);
+    });
+  }
+
+  function setMsg(text, cls) {
+    const msg = document.getElementById('message');
+    msg.textContent = text;
+    msg.className = 'message ' + (cls || '');
+  }
+
+  function handleKey(k) {
+    if (gameOver) return;
+    if (k === 'DEL') { current = current.slice(0, -1); render(); return; }
+    if (k === 'ENTER') {
+      if (current.length < 5) { setMsg('Need 5 letters!', 'warn'); return; }
+      if (!validWords.has(current)) { setMsg('Not in word list!', 'warn'); shakeRow(guesses.length); return; }
+      const result = grade(current);
+      guesses.push({ word: current, result });
+      const won = result.every(r => r === 'correct');
+      current = '';
+      render();
+      if (won)                  { gameOver = true; setMsg(winMsgs[guesses.length-1] + ' 🎉', 'win');  return; }
+      if (guesses.length === 6) { gameOver = true; setMsg('The word was ' + secret, 'lose'); return; }
+      setMsg('');
+      return;
+    }
+    if (/^[A-Z]$/.test(k) && current.length < 5) { current += k; render(); }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toUpperCase();
+    if (k === 'BACKSPACE') handleKey('DEL');
+    else if (k === 'ENTER') handleKey('ENTER');
+    else if (/^[A-Z]$/.test(k)) handleKey(k);
+  });
+
+  document.getElementById('newgame').addEventListener('click', newRound);
+</script>
+</body>
+</html>
